@@ -1,0 +1,71 @@
+import speech_recognition as sr
+import pyttsx3
+import pywhatkit
+import datetime
+import wikipedia
+
+#recognizes voice, initializes voice (pyttsx3) and sets voices for alexa
+listener = sr.Recognizer()
+engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[1].id)
+engine.setProperty('rate',150)
+
+#method that takes in text to be printed and speaks it as well
+def talk(text):
+    engine.say(text)
+    engine.runAndWait()
+
+#takes in voice via microphone, listens to microphone -> if alexa in voice command -> turn voice command into text
+def takeCommand():
+    try:
+        with sr.Microphone() as source:
+            print("listening...")
+            voice = listener.listen(source)
+            command = listener.recognize_google(voice)
+            command = command.lower()
+            if 'alexa' in command:
+                command = command.replace('alexa','')
+                print(command)
+    except:
+        pass
+    return command
+
+def runAlexa():
+    command = takeCommand()
+    print(command)
+    if 'play' in command:
+        songToBePlayed = command.replace('play', '')
+        talk("Okay. Playing" + songToBePlayed)
+        pywhatkit.playonyt(songToBePlayed)
+
+    elif 'time' in command:
+        time = datetime.datetime.now().strftime('%I:%M %p')
+        talk('The current time is ' + time)
+        print(time)
+
+    elif 'who is' in command:
+        person = command.replace('who is', '')
+        info = wikipedia.summary(person, 1)
+        print(info)
+        talk(info)
+
+    elif 'date' in command:
+        date = datetime.datetime.now().date()
+        date = str(date)
+        talk('The current date is ' + date)
+        print(date)
+
+    elif 'stop' in command:
+        exit()
+
+    elif 'what' in command or 'look up' in command or 'search' in command:
+        searchItem = command.replace('what is', '')
+        pywhatkit.search(searchItem)
+
+    else:
+        talk('please say command again.')
+
+
+while True:
+    runAlexa()
